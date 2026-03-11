@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const PORT = 3000;
-const BACKEND_PORT = 5000;
+const PORT = process.env.PORT || 3000;
+const BACKEND_PORT = process.env.PORT || 5000;
 const FRONTEND_DIR = path.join(__dirname, 'frontend');
 
 // Start backend as child process
