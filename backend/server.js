@@ -55,9 +55,8 @@ const frontendPath = path.join(__dirname, '../frontend');
 console.log('Serving frontend from:', frontendPath);
 app.use(express.static(frontendPath));
 
-// Handle frontend routes using Express v5 syntax
-// Use /*splat instead of * for wildcards
-app.get('/pages/{*splat}', (req, res) => {
+// Handle frontend routes
+app.get('/pages/*', (req, res) => {
     const filePath = path.join(frontendPath, req.path);
     res.sendFile(filePath, (err) => {
         if (err) {
@@ -72,12 +71,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Catch-all for SPA routes (Express v5 syntax)
-app.get('{*splat}', (req, res) => {
-    // Don't interfere with API routes that weren't matched
-    if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'API endpoint not found' });
-    }
+// 404 handler for API routes that don't exist
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// Catch-all for SPA routes - serve index.html
+app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
@@ -90,7 +90,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
     try {
         await connectDB();
-        
+
         server.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`📊 Dashboard: http://localhost:${PORT}/pages/dashboard/index.html`);
