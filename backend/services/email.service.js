@@ -73,7 +73,7 @@ class EmailService {
             </ul>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL}/dashboard.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block;">Start Learning Now</a>
+            <a href="${process.env.APP_URL}/dashboard.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block;">Start Learning Now</a>
           </div>
           <p style="color: #666; font-size: 12px;">Questions? Contact us at wsdmpresh@gmail.com</p>
         </div>
@@ -114,7 +114,7 @@ class EmailService {
             <p><strong>Day:</strong> ${scheduleItem.dayOfWeek}</p>
             ${scheduleItem.notes ? `<p><strong>Notes:</strong> ${scheduleItem.notes}</p>` : ''}
           </div>
-          <a href="${process.env.FRONTEND_URL}/timetable.html" style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;">View Timetable</a>
+          <a href="${process.env.APP_URL}/timetable.html" style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;">View Timetable</a>
         </div>
       </div>
     `;

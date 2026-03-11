@@ -236,7 +236,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpire = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL}/pages/auth/reset-password.html?token=${resetToken}`;
+    const resetUrl = `${process.env.APP_URL}/pages/auth/reset-password.html?token=${resetToken}`;
     
     try {
       await emailService.sendPasswordReset(user.email, resetUrl, user.firstName);
