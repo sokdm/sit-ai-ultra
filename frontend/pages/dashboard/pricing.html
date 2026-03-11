@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.9);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .back-btn {
+            color: #667eea;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            color: #a0a0b0;
+            margin-bottom: 3rem;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+        }
+        .pricing-card.featured {
+            border-color: #667eea;
+            transform: scale(1.05);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .price {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .price span {
+            font-size: 1rem;
+            color: #a0a0b0;
+            -webkit-text-fill-color: #a0a0b0;
+        }
+        .features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        .features li {
+            padding: 0.5rem 0;
+            color: #a0a0b0;
+        }
+        .features li::before {
+            content: '✓';
+            color: #4ade80;
+            margin-right: 0.5rem;
+        }
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎓 SIT AI Ultra</div>
+    </nav>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        <h1>Choose Your Plan</h1>
+        <p class="subtitle">Upgrade to unlock all features</p>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Monthly</h3>
+                <div class="price">$5.99<span>/month</span></div>
+                <ul class="features">
+                    <li>Unlimited AI tutoring</li>
+                    <li>All subjects & coding</li>
+                    <li>Smart quizzes</li>
+                    <li>Study timetable</li>
+                    <li>Email support</li>
+                </ul>
+                <button class="btn btn-outline" onclick="subscribe('monthly')" id="btn-monthly">Choose Monthly</button>
+            </div>
+
+            <div class="pricing-card featured">
+                <h3>Quarterly</h3>
+                <div class="price">$14.99<span>/3 months</span></div>
+                <p style="color: #4ade80; font-size: 0.9rem;">Save 17%</p>
+                <ul class="features">
+                    <li>Everything in Monthly</li>
+                    <li>Priority AI responses</li>
+                    <li>Advanced analytics</li>
+                    <li>Downloadable resources</li>
+                    <li>Referral rewards</li>
+                </ul>
+                <button class="btn btn-primary" onclick="subscribe('quarterly')" id="btn-quarterly">Choose Quarterly</button>
+            </div>
+
+            <div class="pricing-card">
+                <h3>Yearly</h3>
+                <div class="price">$49.99<span>/year</span></div>
+                <p style="color: #4ade80; font-size: 0.9rem;">Save 30%</p>
+                <ul class="features">
+                    <li>Everything in Quarterly</li>
+                    <li>Best value</li>
+                    <li>Early access to features</li>
+                    <li>1-on-1 consultation</li>
+                    <li>Custom study plans</li>
+                </ul>
+                <button class="btn btn-outline" onclick="subscribe('yearly')" id="btn-yearly">Choose Yearly</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorToast" class="error-toast"></div>
+
+    <script>
+        // Use relative URL since frontend is served by same backend
+        const API_BASE_URL = '/api';
+        
+        async function subscribe(plan) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            const btn = document.getElementById(`btn-${plan}`);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Processing<span class="loading"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/payments/initialize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        plan: plan,
+                        redirectUrl: `${window.location.origin}/pages/dashboard/payment-success.html`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.paymentLink) {
+                    window.location.href = data.paymentLink;
+                } else {
+                    showError(data.error || 'Failed to initialize payment');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showError('Network error. Please check console for details.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+
+        if (!localStorage.getItem('token')) {
+            window.location.href = '../auth/login.html';
+        }
+    </script>
+</body>
+</html>

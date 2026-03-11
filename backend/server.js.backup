@@ -1,0 +1,108 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const http = require('http');
+const { Server } = require('socket.io');
+
+// Load env vars
+dotenv.config();
+
+// Initialize app
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Disable caching
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
+// Static files
+app.use(express.static('../frontend'));
+
+// Route imports
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const aiRoutes = require('./routes/ai.routes');
+const quizRoutes = require('./routes/quiz.routes');
+const timetableRoutes = require('./routes/timetable.routes');
+const paymentRoutes = require('./routes/payment.routes');
+const adminRoutes = require('./routes/admin.routes');
+const referralRoutes = require('./routes/referral.routes');
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/quiz', quizRoutes);
+app.use('/api/timetable', timetableRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/referral', referralRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: global.mockMode ? 'MOCK MODE' : 'OK', 
+    mockMode: !!global.mockMode,
+    timestamp: new Date().toISOString() 
+  });
+});
+
+// Root - landing page
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: '../frontend' });
+});
+
+// Dashboard redirect
+app.get('/dashboard', (req, res) => {
+  res.redirect('/pages/dashboard/index.html');
+});
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// Database connection - IMPORT HERE
+const { connectDB } = require('./config/database');
+
+const PORT = process.env.PORT || 3000;
+
+// Start server AFTER connecting to DB
+const startServer = async () => {
+  try {
+    // Connect to database first
+    await connectDB();
+    
+    // Then start server
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📊 Dashboard: http://localhost:${PORT}/pages/dashboard/index.html`);
+      if (global.mockMode) {
+        console.log('⚠️  MOCK MODE: Using in-memory data');
+      }
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+// Run it
+startServer();
+
+module.exports = { io };

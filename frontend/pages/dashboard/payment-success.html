@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 50px;
+            animation: scaleIn 0.5s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p {
+            color: #a0a0b0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .details {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            color: #a0a0b0;
+        }
+        .detail-value {
+            color: white;
+            font-weight: 500;
+        }
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 0.5rem;
+            transition: transform 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status-checking {
+            color: #667eea;
+            margin-top: 1rem;
+        }
+        .error-box {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .countdown {
+            color: #a0a0b0;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loadingState">
+            <div class="loading"></div>
+            <h2>Verifying Payment...</h2>
+            <p class="status-checking">Please wait while we confirm your subscription</p>
+        </div>
+
+        <!-- Success State -->
+        <div id="successState" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h1>Payment Successful!</h1>
+            <p>Your subscription is now active. You can now access all premium features.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value" id="planName">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value" id="amount">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" style="color: #4ade80;">Active</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Expires:</span>
+                    <span class="detail-value" id="expiryDate">-</span>
+                </div>
+            </div>
+
+            <a href="index.html" class="btn">Go to Dashboard</a>
+            <a href="pricing.html" class="btn btn-secondary">View Plans</a>
+            
+            <p class="countdown">Redirecting to dashboard in <span id="countdown">5</span> seconds...</p>
+        </div>
+
+        <!-- Pending State -->
+        <div id="pendingState" style="display: none;">
+            <div style="font-size: 60px; margin-bottom: 1rem;">⏳</div>
+            <h1>Payment Processing</h1>
+            <p>Your payment is being processed. This may take a few moments.</p>
+            <button class="btn" onclick="checkStatus()">Check Status</button>
+            <a href="index.html" class="btn btn-secondary">Go to Dashboard</a>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" style="display: none;">
+            <div style="font-size: 60px; margin-bottom: 1rem;">⚠️</div>
+            <h1>Verification Failed</h1>
+            <div id="errorMessage" class="error-box"></div>
+            <p>If you completed the payment, please contact support.</p>
+            <a href="pricing.html" class="btn">Try Again</a>
+            <a href="index.html" class="btn btn-secondary">Go to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '../auth/login.html';
+        }
+
+        // Parse URL parameters from Flutterwave redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionId = urlParams.get('transaction_id');
+        const txRef = urlParams.get('tx_ref');
+        const status = urlParams.get('status');
+
+        console.log('Payment callback:', { transactionId, txRef, status });
+
+        async function verifyAndActivate() {
+            try {
+                // First, check if we have transaction details from URL
+                if (transactionId && status === 'successful') {
+                    // Verify the transaction with backend
+                    const verifyResponse = await fetch(
+                        `${API_BASE_URL}/payments/verify?transactionId=${transactionId}`,
+                        {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }
+                    );
+                    
+                    const verifyData = await verifyResponse.json();
+                    console.log('Verification response:', verifyData);
+                }
+
+                // Check subscription status (this will reflect webhook updates)
+                const response = await fetch(
+                    `${API_BASE_URL}/payments/subscription-status`,
+                    {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }
+                );
+
+                const data = await response.json();
+                console.log('Subscription status:', data);
+
+                if (data.active) {
+                    // Subscription is active!
+                    showSuccess(data);
+                } else if (status === 'successful' || status === 'completed') {
+                    // Payment reported as successful but subscription not yet active
+                    // Webhook might still be processing
+                    showPending();
+                } else if (status === 'cancelled') {
+                    showError('Payment was cancelled. Please try again.');
+                } else {
+                    showPending();
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError('Unable to verify payment. Please contact support if you were charged.');
+            }
+        }
+
+        function showSuccess(subscriptionData) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('successState').style.display = 'block';
+            
+            // Fill in details
+            document.getElementById('planName').textContent = 
+                subscriptionData.plan ? subscriptionData.plan.charAt(0).toUpperCase() + subscriptionData.plan.slice(1) : 'Premium';
+            
+            // Calculate expiry
+            if (subscriptionData.endDate) {
+                const expiry = new Date(subscriptionData.endDate);
+                document.getElementById('expiryDate').textContent = expiry.toLocaleDateString();
+            }
+
+            // Start countdown
+            let seconds = 5;
+            const countdownEl = document.getElementById('countdown');
+            const interval = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        }
+
+        function showPending() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('pendingState').style.display = 'block';
+            
+            // Auto-retry after 3 seconds
+            setTimeout(() => {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('pendingState').style.display = 'none';
+                verifyAndActivate();
+            }, 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function checkStatus() {
+            document.getElementById('pendingState').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'block';
+            verifyAndActivate();
+        }
+
+        // Start verification
+        verifyAndActivate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.9);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .back-btn {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            padding: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .header-section p {
+            color: #a0a0b0;
+        }
+        .quiz-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .quiz-card:hover {
+            transform: translateY(-3px);
+            border-color: #667eea;
+        }
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        .quiz-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .quiz-desc {
+            color: #a0a0b0;
+            font-size: 0.95rem;
+        }
+        .difficulty {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .difficulty.beginner {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .difficulty.intermediate {
+            background: rgba(250, 204, 21, 0.2);
+            color: #facc15;
+        }
+        .difficulty.advanced {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .quiz-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            color: #a0a0b0;
+            font-size: 0.9rem;
+        }
+        .quiz-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+            width: 100%;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .modal.active {
+            display: block;
+        }
+        .modal-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .quiz-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1rem;
+        }
+        .question-number {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+        }
+        .option-letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            flex: 1;
+        }
+        .nav-btn.prev {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .nav-btn.next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .results-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-top: 2rem;
+        }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem auto;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .leaderboard-preview {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .leader-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .rank.gold { background: linear-gradient(135deg, #ffd700, #ffb700); color: #000; }
+        .rank.silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .rank.bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/pages/dashboard/index.html" class="back-btn">← Back</a>
+        <div class="logo">🎓 SIT AI Ultra</div>
+    </nav>
+    
+    <div class="container">
+        <div class="header-section">
+            <h1>Available Quizzes</h1>
+            <p>Test your knowledge and climb the leaderboard!</p>
+        </div>
+
+        <div class="quiz-list" id="quizList"></div>
+    </div>
+
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeQuiz()">×</button>
+            <div class="quiz-header-bar">
+                <span id="quizTitle">Quiz</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+                <span id="questionCounter">1/10</span>
+            </div>
+            <div id="quizContainer"></div>
+            <div class="quiz-nav" id="quizNav">
+                <button class="nav-btn prev" onclick="prevQuestion()" id="prevBtn">← Previous</button>
+                <button class="nav-btn next" onclick="nextQuestion()" id="nextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '../auth/login.html';
+        }
+
+        const quizzes = [
+            {
+                id: 'python-basics',
+                title: 'Python Basics',
+                description: 'Test your fundamental Python programming knowledge',
+                difficulty: 'beginner',
+                questions: 10,
+                time: '15 min',
+                icon: '🐍'
+            },
+            {
+                id: 'javascript-fundamentals',
+                title: 'JavaScript Fundamentals',
+                description: 'Core concepts of JavaScript programming',
+                difficulty: 'intermediate',
+                questions: 15,
+                time: '20 min',
+                icon: '⚡'
+            },
+            {
+                id: 'math-algebra',
+                title: 'Mathematics - Algebra',
+                description: 'Algebraic expressions, equations, and problem solving',
+                difficulty: 'beginner',
+                questions: 12,
+                time: '18 min',
+                icon: '📐'
+            },
+            {
+                id: 'science-physics',
+                title: 'Physics Basics',
+                description: 'Mechanics, thermodynamics, and waves',
+                difficulty: 'intermediate',
+                questions: 10,
+                time: '15 min',
+                icon: '⚛️'
+            },
+            {
+                id: 'web-development',
+                title: 'Web Development',
+                description: 'HTML, CSS, and modern web technologies',
+                difficulty: 'advanced',
+                questions: 20,
+                time: '25 min',
+                icon: '🌐'
+            }
+        ];
+
+        let currentQuiz = null;
+        let currentQuestion = 0;
+        let answers = [];
+        let questions = [];
+
+        function renderQuizzes() {
+            const container = document.getElementById('quizList');
+            container.innerHTML = quizzes.map(quiz => `
+                <div class="quiz-card" onclick="startQuiz('${quiz.id}')">
+                    <div class="quiz-header">
+                        <div>
+                            <div class="quiz-title">${quiz.icon} ${quiz.title}</div>
+                            <div class="quiz-desc">${quiz.description}</div>
+                        </div>
+                        <span class="difficulty ${quiz.difficulty}">${quiz.difficulty}</span>
+                    </div>
+                    <div class="quiz-meta">
+                        <span>📝 ${quiz.questions} questions</span>
+                        <span>⏱️ ${quiz.time}</span>
+                    </div>
+                    <button class="start-btn">Start Quiz</button>
+                </div>
+            `).join('');
+        }
+
+        async function startQuiz(quizId) {
+            currentQuiz = quizzes.find(q => q.id === quizId);
+            currentQuestion = 0;
+            answers = [];
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/quiz/${quizId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    questions = data.questions || getSampleQuestions(quizId);
+                } else {
+                    questions = getSampleQuestions(quizId);
+                }
+            } catch (error) {
+                questions = getSampleQuestions(quizId);
+            }
+            
+            document.getElementById('quizModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('quizTitle').textContent = currentQuiz.title;
+            showQuestion();
+        }
+
+        function getSampleQuestions(quizId) {
+            const questionSets = {
+                'python-basics': [
+                    {
+                        question: 'What is the correct way to create a variable in Python?',
+                        options: ['var x = 5', 'x = 5', 'int x = 5', 'let x = 5'],
+                        correct: 1
+                    },
+                    {
+                        question: 'Which function is used to print output in Python?',
+                        options: ['echo()', 'print()', 'console.log()', 'printf()'],
+                        correct: 1
+                    },
+                    {
+                        question: 'What is the result of 3 ** 2 in Python?',
+                        options: ['6', '9', '5', '8'],
+                        correct: 1
+                    },
+                    {
+                        question: 'How do you create a list in Python?',
+                        options: ['{}', '[]', '()', '<>'],
+                        correct: 1
+                    },
+                    {
+                        question: 'What is the correct file extension for Python files?',
+                        options: ['.py', '.python', '.pt', '.p'],
+                        correct: 0
+                    }
+                ],
+                'javascript-fundamentals': [
+                    {
+                        question: 'What is the output of typeof null in JavaScript?',
+                        options: ['"null"', '"undefined"', '"object"', '"number"'],
+                        correct: 2
+                    },
+                    {
+                        question: 'Which method adds an element to the end of an array?',
+                        options: ['push()', 'pop()', 'shift()', 'unshift()'],
+                        correct: 0
+                    },
+                    {
+                        question: 'What does === operator do in JavaScript?',
+                        options: ['Assigns value', 'Compares value only', 'Compares value and type', 'None of these'],
+                        correct: 2
+                    }
+                ],
+                'math-algebra': [
+                    {
+                        question: 'Solve for x: 2x + 5 = 15',
+                        options: ['5', '10', '7.5', '20'],
+                        correct: 0
+                    },
+                    {
+                        question: 'What is the value of x² when x = -3?',
+                        options: ['-9', '9', '6', '-6'],
+                        correct: 1
+                    },
+                    {
+                        question: 'Factor: x² - 9',
+                        options: ['(x-3)(x+3)', '(x-9)(x+1)', '(x-3)²', 'Cannot be factored'],
+                        correct: 0
+                    }
+                ],
+                'science-physics': [
+                    {
+                        question: 'What is the SI unit of force?',
+                        options: ['Watt', 'Joule', 'Newton', 'Pascal'],
+                        correct: 2
+                    },
+                    {
+                        question: 'What is the acceleration due to gravity on Earth?',
+                        options: ['8.9 m/s²', '9.8 m/s²', '10 m/s²', '9.2 m/s²'],
+                        correct: 1
+                    }
+                ],
+                'web-development': [
+                    {
+                        question: 'What does HTML stand for?',
+                        options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Hyper Transfer Markup Language', 'Home Tool Markup Language'],
+                        correct: 0
+                    },
+                    {
+                        question: 'Which CSS property changes text color?',
+                        options: ['text-color', 'font-color', 'color', 'text-style'],
+                        correct: 2
+                    }
+                ]
+            };
+            
+            return questionSets[quizId] || questionSets['python-basics'];
+        }
+
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionCounter').textContent = `${currentQuestion + 1}/${questions.length}`;
+            
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">Question ${currentQuestion + 1} of ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, idx) => `
+                            <div class="option ${answers[currentQuestion] === idx ? 'selected' : ''}" 
+                                 onclick="selectAnswer(${idx})">
+                                <div class="option-letter">${String.fromCharCode(65 + idx)}</div>
+                                <div>${opt}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').textContent = 
+                currentQuestion === questions.length - 1 ? '✓ Finish' : 'Next →';
+        }
+
+        function selectAnswer(index) {
+            answers[currentQuestion] = index;
+            showQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            let correct = 0;
+            answers.forEach((ans, idx) => {
+                if (ans === questions[idx].correct) correct++;
+            });
+            
+            const percentage = Math.round((correct / questions.length) * 100);
+            
+            document.getElementById('quizContainer').innerHTML = `
+                <div class="results-card">
+                    <h2>🎉 Quiz Completed!</h2>
+                    <div class="score-circle">${percentage}%</div>
+                    <p>You got <strong>${correct}</strong> out of <strong>${questions.length}</strong> questions correct</p>
+                    <p style="margin-top: 1rem; color: ${percentage >= 70 ? '#4ade80' : '#facc15'}; font-size: 1.1rem;">
+                        ${percentage >= 80 ? '🌟 Excellent!' : percentage >= 60 ? '👍 Good job!' : '💪 Keep practicing!'}
+                    </p>
+                    <div class="leaderboard-preview">
+                        <h3>🏆 Leaderboard</h3>
+                        <div class="leader-item">
+                            <div class="rank gold">1</div>
+                            <div style="flex:1">Alex Johnson</div>
+                            <div style="color:#667eea">2450 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="rank silver">2</div>
+                            <div style="flex:1">Sarah Smith</div>
+                            <div style="color:#667eea">2380 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="rank bronze">3</div>
+                            <div style="flex:1">You</div>
+                            <div style="color:#4ade80">+${correct * 10} pts</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('quizNav').innerHTML = `
+                <button class="nav-btn prev" onclick="closeQuiz()">← Back to Quizzes</button>
+                <button class="nav-btn next" onclick="retakeQuiz()">🔄 Retake</button>
+            `;
+            
+            saveResult(correct, questions.length);
+        }
+
+        function retakeQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById('quizNav').innerHTML = `
+                <button class="nav-btn prev" onclick="prevQuestion()" id="prevBtn">← Previous</button>
+                <button class="nav-btn next" onclick="nextQuestion()" id="nextBtn">Next →</button>
+            `;
+            showQuestion();
+        }
+
+        async function saveResult(correct, total) {
+            try {
+                await fetch(`${API_BASE_URL}/quiz/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        quizId: currentQuiz.id,
+                        score: correct,
+                        total: total,
+                        percentage: Math.round((correct / total) * 100)
+                    })
+                });
+            } catch (error) {
+                console.error('Error saving result:', error);
+            }
+        }
+
+        function closeQuiz() {
+            document.getElementById('quizModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('quizNav').innerHTML = `
+                <button class="nav-btn prev" onclick="prevQuestion()" id="prevBtn">← Previous</button>
+                <button class="nav-btn next" onclick="nextQuestion()" id="nextBtn">Next →</button>
+            `;
+            currentQuiz = null;
+            currentQuestion = 0;
+            answers = [];
+        }
+
+        renderQuizzes();
+    </script>
+</body>
+</html>

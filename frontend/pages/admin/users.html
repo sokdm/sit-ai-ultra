@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - SIT AI Ultra Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.9);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #a0a0b0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #667eea;
+        }
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 1rem;
+        }
+        input, select {
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+        }
+        input::placeholder {
+            color: #a0a0b0;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        th {
+            color: #a0a0b0;
+            font-weight: 500;
+        }
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .status.active {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .status.trial {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+        .status.none {
+            background: rgba(160, 160, 176, 0.2);
+            color: #a0a0b0;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+        .action-btn.block {
+            background: #ef4444;
+            color: white;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal-content h3 {
+            margin-bottom: 1rem;
+        }
+        .modal-content select, .modal-content input {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .modal-actions .confirm {
+            background: #667eea;
+            color: white;
+        }
+        .modal-actions .cancel {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎓 SIT AI Ultra Admin</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="users.html" class="active">Users</a>
+            <a href="payments.html">Payments</a>
+            <div class="admin-info">
+                <span id="adminName">Admin</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Users Management</h1>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search users...">
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="trial">Trial</option>
+                    <option value="none">None</option>
+                </select>
+                <button class="btn" onclick="loadUsers()">Search</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Plan</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTable"></tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <div id="actionModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">User Action</h3>
+            <div id="modalBody"></div>
+            <div class="modal-actions">
+                <button class="cancel" onclick="closeModal()">Cancel</button>
+                <button class="confirm" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('adminToken');
+        let currentAction = null;
+        let selectedUserId = null;
+        
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        const adminName = localStorage.getItem('adminName');
+        if (adminName) {
+            document.getElementById('adminName').textContent = adminName;
+        }
+        
+        async function loadUsers(page = 1) {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            let url = `${API_BASE_URL}/admin/users?page=${page}&limit=20`;
+            if (search) url += `&search=${search}`;
+            if (status) url += `&status=${status}`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderUsers(data.users);
+                    renderPagination(data.totalPages, data.currentPage);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.firstName} ${user.lastName}</td>
+                    <td>${user.email}</td>
+                    <td><span class="status ${user.subscriptionStatus}">${user.subscriptionStatus}</span></td>
+                    <td>${user.subscriptionPlan || '-'}</td>
+                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td class="actions">
+                        <button class="action-btn edit" onclick="showActionModal('${user._id}', 'extend_trial')">+Trial</button>
+                        <button class="action-btn edit" onclick="showActionModal('${user._id}', 'grant_subscription')">+Sub</button>
+                        <button class="action-btn block" onclick="showActionModal('${user._id}', 'block')">Block</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderPagination(totalPages, currentPage) {
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="btn" style="${i === currentPage ? 'background: #667eea;' : ''}" onclick="loadUsers(${i})">${i}</button>`;
+            }
+            document.getElementById('pagination').innerHTML = html;
+        }
+        
+        function showActionModal(userId, action) {
+            selectedUserId = userId;
+            currentAction = action;
+            const modal = document.getElementById('actionModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            const titles = {
+                extend_trial: 'Extend Trial Period',
+                grant_subscription: 'Grant Subscription',
+                block: 'Block User',
+                unblock: 'Unblock User',
+                cancel_subscription: 'Cancel Subscription'
+            };
+            
+            title.textContent = titles[action] || 'User Action';
+            
+            if (action === 'extend_trial') {
+                body.innerHTML = '<input type="number" id="daysInput" placeholder="Number of days" value="7">';
+            } else if (action === 'grant_subscription') {
+                body.innerHTML = `
+                    <select id="planSelect">
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                `;
+            } else {
+                body.innerHTML = '<p>Are you sure you want to proceed?</p>';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('actionModal').style.display = 'none';
+        }
+        
+        async function confirmAction() {
+            let data = {};
+            
+            if (currentAction === 'extend_trial') {
+                data.days = parseInt(document.getElementById('daysInput').value);
+            } else if (currentAction === 'grant_subscription') {
+                data.plan = document.getElementById('planSelect').value;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/users/${selectedUserId}/manage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: currentAction, data })
+                });
+                
+                if (response.ok) {
+                    closeModal();
+                    loadUsers();
+                    alert('Action completed successfully');
+                } else {
+                    alert('Failed to perform action');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error performing action');
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminName');
+            window.location.href = 'login.html';
+        }
+        
+        loadUsers();
+    </script>
+</body>
+</html>

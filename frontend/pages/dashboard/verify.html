@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .otp-inputs input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        .otp-inputs input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .resend {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .resend:disabled {
+            color: #666;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        .error {
+            color: #ef4444;
+            margin-top: 1rem;
+        }
+        .success {
+            color: #4ade80;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎓 SIT AI Ultra</div>
+        <h2>Verify Your Email</h2>
+        <p style="color: #a0a0b0; margin: 1rem 0;">Enter the 6-digit code sent to <strong id="emailDisplay"></strong></p>
+        
+        <div class="otp-inputs">
+            <input type="text" maxlength="1" class="otp-digit">
+            <input type="text" maxlength="1" class="otp-digit">
+            <input type="text" maxlength="1" class="otp-digit">
+            <input type="text" maxlength="1" class="otp-digit">
+            <input type="text" maxlength="1" class="otp-digit">
+            <input type="text" maxlength="1" class="otp-digit">
+        </div>
+
+        <button class="btn" id="verifyBtn">Verify Email</button>
+        
+        <p style="color: #a0a0b0; font-size: 0.9rem;">
+            Didn't receive code? <span class="resend" id="resendBtn">Resend</span>
+            <span id="timer" style="color: #666;"></span>
+        </p>
+
+        <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
+    </div>
+
+    <script>
+        const email = localStorage.getItem('email');
+        const userId = localStorage.getItem('userId');
+        document.getElementById('emailDisplay').textContent = email;
+
+        // Auto-focus OTP inputs
+        const inputs = document.querySelectorAll('.otp-digit');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const otp = Array.from(inputs).map(i => i.value).join('');
+            
+            if (otp.length !== 6) {
+                document.getElementById('error').textContent = 'Please enter all 6 digits';
+                return;
+            }
+
+            document.getElementById('verifyBtn').disabled = true;
+            document.getElementById('verifyBtn').textContent = 'Verifying...';
+
+            try {
+                const response = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, otp })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    document.getElementById('success').textContent = 'Verified! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = '../dashboard/tutor.html';
+                    }, 1000);
+                } else {
+                    document.getElementById('error').textContent = data.error || 'Invalid OTP';
+                    document.getElementById('verifyBtn').disabled = false;
+                    document.getElementById('verifyBtn').textContent = 'Verify Email';
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = 'Network error';
+                document.getElementById('verifyBtn').disabled = false;
+                document.getElementById('verifyBtn').textContent = 'Verify Email';
+            }
+        });
+
+        // Resend functionality
+        let canResend = true;
+        let countdown = 60;
+        
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            if (!canResend) return;
+            
+            try {
+                const response = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+
+                if (response.ok) {
+                    canResend = false;
+                    document.getElementById('resendBtn').style.pointerEvents = 'none';
+                    startTimer();
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = 'Failed to resend';
+            }
+        });
+
+        function startTimer() {
+            const timer = setInterval(() => {
+                countdown--;
+                document.getElementById('timer').textContent = ` (${countdown}s)`;
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    canResend = true;
+                    countdown = 60;
+                    document.getElementById('resendBtn').style.pointerEvents = 'auto';
+                    document.getElementById('timer').textContent = '';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

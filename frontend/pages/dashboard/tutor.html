@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 280px;
+            background: #1a1a2e;
+            border-right: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .new-chat-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .conversations {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .conversation-item {
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .conversation-item:hover, .conversation-item.active {
+            background: rgba(102, 126, 234, 0.2);
+        }
+        .conversation-item .icon {
+            font-size: 1        .conversation-item .icon {
+            font-size: 1.2rem;
+        }
+        .conversation-item .info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .conversation-item .title {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .conversation-item .time {
+            font-size: 0.7rem;
+            color: #a0a0b0;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f1a;
+        }
+        .chat-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h2 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .back-btn {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #4ade80;
+        }
+        .status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 12px;
+            animation: messageIn 0.3s ease;
+        }
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-bottom-right-radius: 4px;
+        }
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 4px;
+        }
+        .message .content {
+            line-height: 1.6;
+        }
+        .message .time {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+        }
+        .typing-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        .input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .input-container {
+            display: flex;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 0.5rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        .input-container input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.8rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        .input-container input::placeholder {
+            color: #a0a0b0;
+        }
+        .input-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .input-btn:hover {
+            background: #667eea;
+        }
+        .send-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .message pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+        .message code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .message { max-width: 90%; }
+        }
+.pidgin-badge {
+    background: linear-gradient(135deg, #008751, #ffffff);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 1rem;
+}
+.suggestion-chips {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    overflow-x: auto;
+    flex-wrap: wrap;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+}
+.chip {
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    color: white;
+}
+.chip:hover {
+    background: rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <span>+</span> New Chat
+                </button>
+            </div>
+            <div class="conversations" id="conversations">
+                <p style="color: #666; text-align: center; padding: 1rem;">Loading chats...</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="chat-header">
+                <div style="display: flex; align-items: center;">
+                    <a href="index.html" class="back-btn">←</a>
+                    <h2>
+                        <span>🤖</span>
+                        <span>AI Tutor</span>
+                    </h2>
+                </div>
+                <div class="status">Online</div>
+            </header>
+
+            <div class="messages-container" id="messages"></div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <span>AI is thinking</span>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <button class="input-btn" onclick="toggleVoice()">🎤</button>
+                    <input type="text" id="messageInput" placeholder="Ask me anything..." 
+                           onkeypress="if(event.key==='Enter')sendMessage()">
+                    <button class="input-btn" onclick="document.getElementById('imageInput').click()">📎</button>
+                    <input type="file" id="imageInput" hidden accept="image/*" onchange="handleImage(event)">
+                    <button class="input-btn send-btn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket, currentSessionId = localStorage.getItem('currentSessionId') || 'session-' + Date.now();
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('token')) return window.location.href = '../auth/login.html';
+            localStorage.setItem('currentSessionId', currentSessionId);
+            initSocket();
+            loadMessages();
+            loadConversations();
+        });
+
+        function initSocket() {
+            socket = io();
+            socket.emit('authenticate', localStorage.getItem('token'));
+            socket.on('ai_response', (data) => {
+                hideTyping();
+                addMessage('assistant', data.response);
+                saveMsg(data.response, 'assistant');
+            });
+            socket.on('ai_typing', (d) => d.status ? showTyping() : hideTyping());
+        }
+
+        function loadMessages() {
+            const saved = localStorage.getItem(`messages_${currentSessionId}`);
+            if (saved) {
+                JSON.parse(saved).forEach(m => addMessage(m.role, m.content, new Date(m.timestamp)));
+            } else {
+                showWelcome();
+            }
+        }
+
+        function showWelcome() {
+            const hour = new Date().getHours();
+            let g = 'Hello', e = '👋';
+            if (hour < 6) { g = "You're up late"; e = '🌙'; }
+            else if (hour < 12) { g = 'Good morning'; e = '☀️'; }
+            else if (hour < 17) { g = 'Good afternoon'; e = '🌤️'; }
+            else if (hour < 22) { g = 'Good evening'; e = '🌆'; }
+            else { g = "You're up late"; e = '🌙'; }
+            
+            const msg = `${g}, ${user.firstName || 'there'}! ${e}\n\nI'm your AI tutor. I can help with:\n• **All school subjects** (Math, Science, etc.)\n• **Coding** (Python, JS, Java, etc.)\n• **Homework & exam prep**\n• **Image analysis**\n\nWhat would you like to learn?`;
+            addMessage('assistant', msg);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            
+            addMessage('user', msg);
+            saveMsg(msg, 'user');
+            input.value = '';
+            
+            if (socket) {
+                socket.emit('chat_message', { message: msg, sessionId: currentSessionId });
+            } else {
+                fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: JSON.stringify({ message: msg, sessionId: currentSessionId })
+                }).then(r => r.json()).then(d => {
+                    hideTyping();
+                    if (d.success) { addMessage('assistant', d.response); saveMsg(d.response, 'assistant'); }
+                });
+            }
+        }
+
+        function addMessage(role, content, time) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = `<div class="content">${content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div><div class="time">${time ? time.toLocaleTimeString() : new Date().toLocaleTimeString()}</div>`;
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        function saveMsg(content, role) {
+            const key = `messages_${currentSessionId}`;
+            const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+            msgs.push({ role, content, timestamp: new Date().toISOString() });
+            localStorage.setItem(key, JSON.stringify(msgs));
+        }
+
+        function showTyping() { document.getElementById('typingIndicator').classList.add('active'); }
+        function hideTyping() { document.getElementById('typingIndicator').classList.remove('active'); }
+        
+        function startNewChat() {
+            currentSessionId = 'session-' + Date.now();
+            localStorage.setItem('currentSessionId', currentSessionId);
+            document.getElementById('messages').innerHTML = '';
+            showWelcome();
+            loadConversations();
+        }
+
+        function loadConversations() {
+            const sessions = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('messages_')) {
+                    const id = key.replace('messages_', '');
+                    const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+                    if (msgs.length > 0) sessions.push({ sessionId: id, title: msgs[0].content.substring(0, 25) + '...', time: msgs[msgs.length-1].timestamp });
+                }
+            }
+            const container = document.getElementById('conversations');
+            container.innerHTML = sessions.length ? sessions.map(s => 
+                `<div class="conversation-item ${s.sessionId === currentSessionId ? 'active' : ''}" onclick="switchChat('${s.sessionId}')">
+                    <span class="icon">💬</span>
+                    <div class="info"><div class="title">${s.title}</div><div class="time">${new Date(s.time).toLocaleDateString()}</div></div>
+                </div>`
+            ).join('') : '<p style="color: #666; text-align: center; padding: 1rem;">No previous chats</p>';
+        }
+
+        function switchChat(id) {
+            currentSessionId = id;
+            localStorage.setItem('currentSessionId', id);
+            document.getElementById('messages').innerHTML = '';
+            const saved = localStorage.getItem(`messages_${id}`);
+            if (saved) JSON.parse(saved).forEach(m => addMessage(m.role, m.content, new Date(m.timestamp)));
+            loadConversations();
+        }
+
+        function toggleVoice() {
+            if ('webkitSpeechRecognition' in window) {
+                const r = new webkitSpeechRecognition();
+                r.onresult = (e) => { document.getElementById('messageInput').value = e.results[0][0].transcript; sendMessage(); };
+                r.start();
+            } else alert('Voice not supported');
+        }
+
+        function handleImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                addMessage('user', '[Image uploaded]');
+                saveMsg('[Image uploaded]', 'user');
+                fetch('/api/ai/analyze-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: JSON.stringify({ imageBase64: evt.target.result, question: 'Analyze this image' })
+                }).then(r => r.json()).then(d => {
+                    if (d.success) { addMessage('assistant', d.analysis); saveMsg(d.analysis, 'assistant'); }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
+<style>
+.pidgin-badge {
+    background: linear-gradient(135deg, #008751, #ffffff);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 1rem;
+}
+.image-gen-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.suggestion-chips {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    overflow-x: auto;
+    flex-wrap: wrap;
+}
+.chip {
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+.chip:hover {
+    background: rgba(102, 126, 234, 0.4);
+}
+.pidgin-badge {
+    background: linear-gradient(135deg, #008751, #ffffff);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 1rem;
+}
+.suggestion-chips {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    overflow-x: auto;
+    flex-wrap: wrap;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+}
+.chip {
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    color: white;
+}
+.chip:hover {
+    background: rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+}
+</style>
+
+    <div class="suggestion-chips" id="suggestions">
+        <div class="chip" onclick="setMessage('Explain quantum physics like I\'m 5')">🧪 Quantum Physics</div>
+        <div class="chip" onclick="setMessage('Help me debug this Python code')">🐍 Debug Code</div>
+        <div class="chip" onclick="setMessage('Draw a diagram of photosynthesis')">🌱 Photosynthesis</div>
+        <div class="chip" onclick="setMessage('How far? Make you teach me calculus')">🇳🇬 Pidgin Mode</div>
+        <div class="chip" onclick="setMessage('Create study plan for JAMB')">📚 JAMB Prep</div>
+        <div class="chip" onclick="setMessage('Generate image of solar system')">🎨 Generate Image</div>
+    </div>
+
+    <script>
+        function setMessage(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
+        }
+        
+        // Detect Pidgin and show badge
+        const originalAddMessage = window.addMessage;
+        window.addMessage = function(role, content, time) {
+            if (role === 'user' && content.toLowerCase().match(/(abi|abeg|wahala|shey|i dey|how far|omo|sha)/)) {
+                if (!document.querySelector('.pidgin-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'pidgin-badge';
+                    badge.textContent = '🇳🇬 Pidgin Mode';
+                    document.querySelector('.chat-header h2').appendChild(badge);
+                }
+            }
+            return originalAddMessage(role, content, time);
+        };
+    </script>
+</body>
+</html>

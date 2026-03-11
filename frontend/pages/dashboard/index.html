@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f0f1a">
+    <title>Dashboard - SIT AI Ultra</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #0f0f1a;
+            --darker: #050508;
+            --card: rgba(255, 255, 255, 0.05);
+            --border: rgba(102, 126, 234, 0.2);
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* iOS Safe Areas */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .navbar { padding-top: env(safe-area-inset-top); }
+            .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .icon-btn:active { transform: scale(0.95); }
+        .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+        .welcome-section {
+            margin-bottom: 1.5rem;
+        }
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .welcome-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .welcome-text p {
+            color: #a0a0b0;
+            font-size: 0.9rem;
+        }
+        .streak-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .subscription-banner {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .sub-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .sub-info p {
+            color: #a0a0b0;
+            font-size: 0.85rem;
+        }
+        .upgrade-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .upgrade-btn:active { transform: scale(0.98); }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-title a {
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: white;
+        }
+        .feature-card:active { transform: scale(0.98); }
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 0.75rem;
+        }
+        .feature-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+        .feature-desc {
+            font-size: 0.75rem;
+            color: #a0a0b0;
+        }
+        .chat-history-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 0.5rem;
+        }
+        .chat-item:last-child { margin-bottom: 0; }
+        .chat-item:active { background: rgba(102, 126, 234, 0.1); }
+        .chat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .chat-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-preview {
+            font-size: 0.8rem;
+            color: #a0a0b0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-meta {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .chat-time {
+            font-size: 0.75rem;
+            color: #a0a0b0;
+        }
+        .chat-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 10px;
+            margin-top: 0.25rem;
+        }
+        .leaderboard-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .leader-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+        .leader-item:active { background: rgba(102, 126, 234, 0.1); }
+        .rank {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .rank.gold { background: linear-gradient(135deg, #ffd700, #ffb700); color: #000; }
+        .rank.silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .rank.bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+        .rank.other { background: rgba(255,255,255,0.1); color: #a0a0b0; }
+        .leader-info { flex: 1; }
+        .leader-name { font-weight: 600; font-size: 0.95rem; }
+        .leader-stats { font-size: 0.8rem; color: #a0a0b0; }
+        .leader-points {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+        .profile-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            border: 3px solid rgba(255,255,255,0.1);
+        }
+        .profile-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .profile-email { color: #a0a0b0; font-size: 0.85rem; margin-bottom: 1rem; }
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; }
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        .stat-label { font-size: 0.75rem; color: #a0a0b0; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            color: #a0a0b0;
+            text-decoration: none;
+            font-size: 0.7rem;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 1.25rem; }
+        /* PC/Desktop Styles */
+        @media (min-width: 768px) {
+            .container { padding: 2rem; padding-bottom: 2rem; }
+            .features-grid { grid-template-columns: repeat(4, 1fr); }
+            .welcome-text h1 { font-size: 2rem; }
+            .bottom-nav { display: none; }
+            .main-content {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 1.5rem;
+            }
+        }
+        /* Tablet */
+        @media (min-width: 480px) and (max-width: 767px) {
+            .features-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        /* Loading State */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎓 SIT AI Ultra</div>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="showNotifications()">
+                🔔
+                <span class="badge" id="notifBadge">3</span>
+            </button>
+            <button class="icon-btn" onclick="window.location.href='/pages/dashboard/profile.html'">
+                👤
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-section">
+            <div class="welcome-header">
+                <div class="welcome-text">
+                    <h1>Welcome back, <span id="userName">Wisdom</span>! 👋</h1>
+                    <p>Ready to continue learning?</p>
+                </div>
+                <div class="streak-badge">
+                    🔥 <span id="streakDays">5</span> days
+                </div>
+            </div>
+        </div>
+
+        <div class="subscription-banner" id="subBanner">
+            <div class="sub-info">
+                <h3>🚀 Upgrade to Premium</h3>
+                <p>Get unlimited AI tutoring</p>
+            </div>
+            <button class="upgrade-btn" onclick="upgrade()">Upgrade</button>
+        </div>
+
+        <div class="features-grid">
+            <a href="/pages/dashboard/ai-tutor.html" class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">AI Tutor</div>
+                <div class="feature-desc">Get instant help</div>
+            </a>
+            <a href="/pages/dashboard/quiz.html" class="feature-card">
+                <div class="feature-icon">📝</div>
+                <div class="feature-title">Quizzes</div>
+                <div class="feature-desc">Test knowledge</div>
+            </a>
+            <a href="/pages/dashboard/timetable.html" class="feature-card">
+                <div class="feature-icon">📅</div>
+                <div class="feature-title">Schedule</div>
+                <div class="feature-desc">Plan studies</div>
+            </a>
+            <a href="/pages/dashboard/referral.html" class="feature-card">
+                <div class="feature-icon">🎁</div>
+                <div class="feature-title">Refer</div>
+                <div class="feature-desc">Earn rewards</div>
+            </a>
+        </div>
+
+        <div class="chat-history-section">
+            <div class="section-title">
+                💬 Recent Chats
+                <a href="/pages/dashboard/ai-tutor.html">New Chat</a>
+            </div>
+            <div id="chatHistory">
+                <!-- Chat history loaded here -->
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="leaderboard-section">
+                <div class="section-title">
+                    🏆 Live Leaderboard
+                    <a href="#" onclick="refreshLeaderboard()">Refresh</a>
+                </div>
+                <div id="leaderboard">
+                    <!-- Leaderboard loaded here -->
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-avatar" id="profileAvatar">👤</div>
+                <div class="profile-name" id="profileName">Wisdom</div>
+                <div class="profile-email" id="profileEmail">user@example.com</div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statRank">#--</div>
+                        <div class="stat-label">Rank</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statQuizzes">0</div>
+                        <div class="stat-label">Quizzes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statPoints">0</div>
+                        <div class="stat-label">Points</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/pages/dashboard/index.html" class="nav-item active">
+            <span>🏠</span>
+            Home
+        </a>
+        <a href="/pages/dashboard/ai-tutor.html" class="nav-item">
+            <span>🤖</span>
+            AI Tutor
+        </a>
+        <a href="/pages/dashboard/quiz.html" class="nav-item">
+            <span>📝</span>
+            Quiz
+        </a>
+        <a href="/pages/dashboard/timetable.html" class="nav-item">
+            <span>📅</span>
+            Schedule
+        </a>
+        <a href="/pages/dashboard/profile.html" class="nav-item">
+            <span>👤</span>
+            Profile
+        </a>
+    </nav>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/pages/auth/login.html';
+        }
+
+        // Load user data and dashboard
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const user = data.user || data;
+                    
+                    document.getElementById('userName').textContent = user.firstName || 'User';
+                    document.getElementById('profileName').textContent = `${user.firstName || ''} ${user.lastName || ''}`;
+                    document.getElementById('profileEmail').textContent = user.email || '';
+                    
+                    if (user.avatar) {
+                        document.getElementById('profileAvatar').textContent = user.avatar;
+                    }
+                    
+                    if (user.subscriptionStatus === 'active') {
+                        document.getElementById('subBanner').style.display = 'none';
+                    }
+                    
+                    if (user.stats) {
+                        document.getElementById('streakDays').textContent = user.stats.streak || 0;
+                        document.getElementById('statQuizzes').textContent = user.stats.quizzesTaken || 0;
+                        document.getElementById('statPoints').textContent = user.stats.points || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+            
+            loadChatHistory();
+            loadLeaderboard();
+        }
+
+        // Load chat history from localStorage and API
+        async function loadChatHistory() {
+            const chatContainer = document.getElementById('chatHistory');
+            
+            // Try to get from API first
+            try {
+                const response = await fetch(`${API_BASE_URL}/ai/chats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.chats && data.chats.length > 0) {
+                        renderChats(data.chats);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('API chats not available, using localStorage');
+            }
+            
+            // Fallback to localStorage
+            const localChats = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+            if (localChats.length > 0) {
+                renderChats(localChats);
+            } else {
+                // Show default chats
+                renderChats([
+                    { id: '1', title: 'Python Basics', preview: 'How do I create a function?', time: '2h ago', unread: 0 },
+                    { id: '2', title: 'Math Homework', preview: 'Can you solve 2x + 5 = 15?', time: '5h ago', unread: 2 },
+                    { id: '3', title: 'Science Project', preview: 'Explain photosynthesis', time: '1d ago', unread: 0 }
+                ]);
+            }
+        }
+
+        function renderChats(chats) {
+            const container = document.getElementById('chatHistory');
+            container.innerHTML = chats.map(chat => `
+                <div class="chat-item" onclick="continueChat('${chat.id}')">
+                    <div class="chat-icon">💬</div>
+                    <div class="chat-info">
+                        <div class="chat-title">${chat.title}</div>
+                        <div class="chat-preview">${chat.preview}</div>
+                    </div>
+                    <div class="chat-meta">
+                        <div class="chat-time">${chat.time}</div>
+                        ${chat.unread > 0 ? `<div class="chat-badge">${chat.unread}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function continueChat(chatId) {
+            window.location.href = `/pages/dashboard/ai-tutor.html?chat=${chatId}`;
+        }
+
+        // Load live leaderboard from API
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/leaderboard`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderLeaderboard(data.leaderboard || []);
+                } else {
+                    throw new Error('Failed to fetch');
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                // Fallback to mock data if API fails
+                renderLeaderboard([
+                    { name: 'Alex Johnson', quizzes: 45, points: 2450 },
+                    { name: 'Sarah Smith', quizzes: 42, points: 2380 },
+                    { name: 'Mike Brown', quizzes: 38, points: 2200 },
+                    { name: 'Emma Wilson', quizzes: 36, points: 2150 },
+                    { name: 'Chris Lee', quizzes: 35, points: 2080 }
+                ]);
+            }
+        }
+
+        function renderLeaderboard(users) {
+            const container = document.getElementById('leaderboard');
+            const currentUser = document.getElementById('profileName').textContent;
+            
+            // Find user rank
+            const userRank = users.findIndex(u => u.name === currentUser) + 1;
+            if (userRank > 0) {
+                document.getElementById('statRank').textContent = `#${userRank}`;
+            }
+            
+            container.innerHTML = users.slice(0, 5).map((user, index) => {
+                let rankClass = 'other';
+                if (index === 0) rankClass = 'gold';
+                else if (index === 1) rankClass = 'silver';
+                else if (index === 2) rankClass = 'bronze';
+                
+                return `
+                    <div class="leader-item">
+                        <div class="rank ${rankClass}">${index + 1}</div>
+                        <div class="leader-info">
+                            <div class="leader-name">${user.name}</div>
+                            <div class="leader-stats">${user.quizzes} quizzes</div>
+                        </div>
+                        <div class="leader-points">${user.points} pts</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function refreshLeaderboard() {
+            const btn = event.target;
+            btn.textContent = '⏳';
+            loadLeaderboard().then(() => {
+                setTimeout(() => btn.textContent = 'Refresh', 500);
+            });
+        }
+
+        function upgrade() {
+            window.location.href = '/pages/dashboard/pricing.html';
+        }
+
+        function showNotifications() {
+            alert('Notifications: Coming soon!');
+        }
+
+        // Save chat to history when in AI tutor
+        function saveChatToHistory(chatId, title, preview) {
+            const chats = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+            const existingIndex = chats.findIndex(c => c.id === chatId);
+            
+            const chatData = {
+                id: chatId,
+                title: title,
+                preview: preview.substring(0, 50) + '...',
+                time: 'Just now',
+                unread: 0
+            };
+            
+            if (existingIndex >= 0) {
+                chats[existingIndex] = chatData;
+            } else {
+                chats.unshift(chatData);
+                if (chats.length > 10) chats.pop(); // Keep only last 10
+            }
+            
+            localStorage.setItem('chatHistory', JSON.stringify(chats));
+        }
+
+        // Initialize
+        loadDashboard();
+        
+        // Refresh leaderboard every 30 seconds
+        setInterval(loadLeaderboard, 30000);
+    </script>
+</body>
+</html>

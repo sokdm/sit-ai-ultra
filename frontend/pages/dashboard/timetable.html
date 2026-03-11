@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Study Timetable - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .back-btn {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .header-section h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .header-section p {
+            color: #a0a0b0;
+            font-size: 0.9rem;
+        }
+        .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #a0a0b0;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+        }
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .schedule-list {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+        .schedule-list h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #a0a0b0;
+        }
+        .schedule-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .schedule-item:last-child { margin-bottom: 0; }
+        .schedule-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .schedule-info p {
+            font-size: 0.85rem;
+            color: #a0a0b0;
+        }
+        .schedule-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .day-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            color: #a0a0b0;
+            text-decoration: none;
+            font-size: 0.7rem;
+        }
+        .nav-item.active { color: #667eea; }
+        .nav-item span { font-size: 1.25rem; }
+        @media (min-width: 768px) {
+            .container { padding: 2rem; }
+            .bottom-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/pages/dashboard/index.html" class="back-btn">←</a>
+        <div class="logo">🎓 Study Timetable</div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Study Timetable</h1>
+            <p>Plan your study sessions and get email reminders.</p>
+        </div>
+
+        <div class="form-card">
+            <h2>Add New Schedule</h2>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" id="subject" placeholder="e.g., Mathematics">
+            </div>
+            <div class="form-group">
+                <label>Day</label>
+                <select id="day">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+            <div class="time-row">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" id="startTime" value="09:00">
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" id="endTime" value="10:00">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addSchedule()">Add Schedule</button>
+        </div>
+
+        <div class="schedule-list">
+            <h2>Your Schedule</h2>
+            <div id="scheduleContainer">
+                <div class="empty-state">No schedules added yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/pages/dashboard/index.html" class="nav-item">
+            <span>🏠</span>Home
+        </a>
+        <a href="/pages/dashboard/ai-tutor.html" class="nav-item">
+            <span>🤖</span>AI Tutor
+        </a>
+        <a href="/pages/dashboard/quiz.html" class="nav-item">
+            <span>📝</span>Quiz
+        </a>
+        <a href="/pages/dashboard/timetable.html" class="nav-item active">
+            <span>📅</span>Schedule
+        </a>
+        <a href="/pages/dashboard/profile.html" class="nav-item">
+            <span>👤</span>Profile
+        </a>
+    </nav>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/pages/auth/login.html';
+        }
+
+        let schedules = JSON.parse(localStorage.getItem('schedules') || '[]');
+
+        function addSchedule() {
+            const subject = document.getElementById('subject').value.trim();
+            const day = document.getElementById('day').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (!subject) {
+                alert('Please enter a subject');
+                return;
+            }
+
+            const schedule = {
+                id: Date.now().toString(),
+                subject,
+                day,
+                startTime,
+                endTime,
+                createdAt: new Date().toISOString()
+            };
+
+            schedules.push(schedule);
+            schedules.sort((a, b) => {
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                return days.indexOf(a.day) - days.indexOf(b.day);
+            });
+
+            localStorage.setItem('schedules', JSON.stringify(schedules));
+            
+            // Try to save to API
+            saveToAPI(schedule);
+            
+            renderSchedules();
+            clearForm();
+        }
+
+        async function saveToAPI(schedule) {
+            try {
+                await fetch(`${API_BASE_URL}/timetable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(schedule)
+                });
+            } catch (e) {
+                console.log('Saved locally only');
+            }
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('Delete this schedule?')) {
+                schedules = schedules.filter(s => s.id !== id);
+                localStorage.setItem('schedules', JSON.stringify(schedules));
+                renderSchedules();
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('subject').value = '';
+            document.getElementById('day').value = 'Monday';
+            document.getElementById('startTime').value = '09:00';
+            document.getElementById('endTime').value = '10:00';
+        }
+
+        function renderSchedules() {
+            const container = document.getElementById('scheduleContainer');
+            
+            if (schedules.length === 0) {
+                container.innerHTML = '<div class="empty-state">No schedules added yet.</div>';
+                return;
+            }
+
+            container.innerHTML = schedules.map(s => `
+                <div class="schedule-item">
+                    <div class="schedule-info">
+                        <h3>${s.subject}</h3>
+                        <p>⏰ ${s.startTime} - ${s.endTime}</p>
+                        <span class="day-badge">${s.day}</span>
+                    </div>
+                    <div class="schedule-actions">
+                        <button class="btn-icon" onclick="deleteSchedule('${s.id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load from API on startup
+        async function loadFromAPI() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/timetable`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.schedules && data.schedules.length > 0) {
+                        schedules = data.schedules;
+                        localStorage.setItem('schedules', JSON.stringify(schedules));
+                        renderSchedules();
+                    }
+                }
+            } catch (e) {
+                console.log('Using local data');
+            }
+        }
+
+        renderSchedules();
+        loadFromAPI();
+    </script>
+</body>
+</html>

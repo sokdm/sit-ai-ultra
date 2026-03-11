@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profile - SIT AI Ultra</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+        .navbar {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .back-btn {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(255,255,255,0.1);
+        }
+        .name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .email {
+            color: #a0a0b0;
+            margin-bottom: 1rem;
+        }
+        .edit-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a0a0b0;
+        }
+        .menu-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background: rgba(102, 126, 234, 0.1); }
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .menu-text { flex: 1; }
+        .menu-title { font-weight: 600; margin-bottom: 0.25rem; }
+        .menu-desc { font-size: 0.8rem; color: #a0a0b0; }
+        .menu-arrow { color: #a0a0b0; }
+        .logout-btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            color: #a0a0b0;
+            text-decoration: none;
+            font-size: 0.7rem;
+        }
+        .nav-item.active { color: #667eea; }
+        .nav-item span { font-size: 1.25rem; }
+        @media (min-width: 768px) {
+            .container { padding: 2rem; }
+            .bottom-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/pages/dashboard/index.html" class="back-btn">←</a>
+        <div class="logo">👤 Profile</div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="avatar" id="userAvatar">👤</div>
+            <div class="name" id="userName">Loading...</div>
+            <div class="email" id="userEmail">...</div>
+            <button class="edit-btn" onclick="editProfile()">Edit Profile</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="statRank">#--</div>
+                <div class="stat-label">Rank</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statQuizzes">0</div>
+                <div class="stat-label">Quizzes</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statPoints">0</div>
+                <div class="stat-label">Points</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-item" onclick="goTo('/pages/dashboard/ai-tutor.html')">
+                <div class="menu-icon">💬</div>
+                <div class="menu-text">
+                    <div class="menu-title">Chat History</div>
+                    <div class="menu-desc">View all your conversations</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goTo('/pages/dashboard/quiz.html')">
+                <div class="menu-icon">📊</div>
+                <div class="menu-text">
+                    <div class="menu-title">Quiz Results</div>
+                    <div class="menu-desc">See your progress</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goTo('/pages/dashboard/timetable.html')">
+                <div class="menu-icon">📅</div>
+                <div class="menu-text">
+                    <div class="menu-title">My Schedule</div>
+                    <div class="menu-desc">Manage study time</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-item" onclick="goTo('/pages/dashboard/pricing.html')">
+                <div class="menu-icon">💎</div>
+                <div class="menu-text">
+                    <div class="menu-title">Subscription</div>
+                    <div class="menu-desc" id="subStatus">Free Plan</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goTo('/pages/dashboard/referral.html')">
+                <div class="menu-icon">🎁</div>
+                <div class="menu-text">
+                    <div class="menu-title">Refer & Earn</div>
+                    <div class="menu-desc">Get free premium days</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">🚪 Log Out</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/pages/dashboard/index.html" class="nav-item">
+            <span>🏠</span>Home
+        </a>
+        <a href="/pages/dashboard/ai-tutor.html" class="nav-item">
+            <span>🤖</span>AI Tutor
+        </a>
+        <a href="/pages/dashboard/quiz.html" class="nav-item">
+            <span>📝</span>Quiz
+        </a>
+        <a href="/pages/dashboard/timetable.html" class="nav-item">
+            <span>📅</span>Schedule
+        </a>
+        <a href="/pages/dashboard/profile.html" class="nav-item active">
+            <span>👤</span>Profile
+        </a>
+    </nav>
+
+    <script>
+        const API_BASE_URL = '/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/pages/auth/login.html';
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const user = data.user || data;
+                    
+                    document.getElementById('userName').textContent = `${user.firstName || ''} ${user.lastName || ''}`;
+                    document.getElementById('userEmail').textContent = user.email || '';
+                    
+                    if (user.avatar) {
+                        document.getElementById('userAvatar').textContent = user.avatar;
+                    }
+                    
+                    if (user.subscriptionStatus === 'active') {
+                        document.getElementById('subStatus').textContent = 'Premium Active';
+                    }
+                    
+                    if (user.stats) {
+                        document.getElementById('statQuizzes').textContent = user.stats.quizzesTaken || 0;
+                        document.getElementById('statPoints').textContent = user.stats.points || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        function goTo(url) {
+            window.location.href = url;
+        }
+
+        function editProfile() {
+            alert('Edit profile coming soon!');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('chatHistory');
+                window.location.href = '/pages/auth/login.html';
+            }
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>
